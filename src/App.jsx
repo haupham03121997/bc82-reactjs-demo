@@ -14,6 +14,7 @@ import DanhSachSanPham from './pages/LiftingStateUp/DanhSachSanPham';
 import DemoRedux from './pages/demoRedux/DemoRedux';
 import ProductList from './pages/product-list';
 import ProductDetails from './pages/product-details';
+import Login from './pages/login';
 
 // BEM: Block Element Modifier
 // isEmail // camelCase
@@ -100,6 +101,7 @@ function App() {
         {/* element sẽ nhận vào Component hoặc JSX cần hiển thị  */}
         <Route path='/demo' element={<div>Hello BC82</div>} />
         {/* <Route path="/" element={<HomePage />} /> */}
+        <Route path='/login' element={<Login />} />
         <Route path='/' element={<HomeTemplate />}>
           <Route index element={<HomePage />} />
           <Route path='/danh-sach-san-pham' element={<DanhSachSanPham />} />

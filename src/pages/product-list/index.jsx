@@ -2,11 +2,31 @@ import React from 'react';
 import { Row, Col, Button, Typography, Space, Skeleton } from 'antd';
 import ProductItem from './ProductItem';
 import axios from 'axios';
+import { useQuery } from '@tanstack/react-query';
+
+// query,mutation
+const handleFetchProducts = async () => {
+  try {
+    const response = await axios.get('https://apistore.cybersoft.edu.vn/api/Product');
+    const data = response.data.content;
+    return data;
+  } catch (error) {
+    throw Error(error);
+  }
+};
 
 export default function ProductList() {
   const [count, setCount] = React.useState(0);
-  const [products, setProducts] = React.useState([]);
-  const [isLoading, setIsLoading] = React.useState(false);
+
+  const {
+    data = [],
+    isFetching,
+    error,
+    refetch,
+  } = useQuery({
+    queryFn: handleFetchProducts,
+    queryKey: ['products'],
+  });
 
   /**
    * useEffect: nhận vào 2 tham số
@@ -18,9 +38,10 @@ export default function ProductList() {
    * - Nếu mảng dependencies không rỗng, hàm callback sẽ được gọi lại mỗi khi một trong các giá trị trong mảng thay đổi
    * - Chạy sau khi component render lần đầu tiên
    */
-  React.useEffect(() => {
-    handleFetchProducts();
-  }, []);
+
+  // React.useEffect(() => {
+  //   handleFetchProducts();
+  // }, []);
 
   /**
    * Đối với mảng dependencies có giá trị là một biến (vd: count), thì hàm callback sẽ được gọi lại mỗi khi biến đó thay đổi
@@ -75,22 +96,13 @@ export default function ProductList() {
   // };
 
   // Lưu trên RAM: xxx , xyx
-  const handleFetchProducts = async () => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get('https://apistore.cybersoft.edu.vn/api/Product');
-      const data = response.data.content;
-      setProducts(data);
-    } catch (error) {
-      console.log('Lỗi kết nối đến API', error);
-      alert('Lỗi kết nối đến API');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleIncreaseCount = () => {
     setCount(count + 1);
+  };
+
+  const handleRefresh = () => {
+    refetch();
   };
 
   return (
@@ -109,7 +121,7 @@ export default function ProductList() {
         />
       </Col> */}
 
-      {isLoading && (
+      {isFetching && (
         <>
           {Array.from({ length: 8 }).map((_, index) => (
             <Col span={8} key={index}>
@@ -118,8 +130,9 @@ export default function ProductList() {
           ))}
         </>
       )}
-      {!isLoading &&
-        products.map((item) => {
+      {!isFetching &&
+        !error &&
+        data.map((item) => {
           // item : { id: 1, name: 'Product 1', price: '$200', image: 'https://via.placeholder.com/150', ... }
           return (
             <Col span={8} key={item.id}>
@@ -127,6 +140,14 @@ export default function ProductList() {
             </Col>
           );
         })}
+      {!isFetching && error && (
+        <div>
+          Đã có lỗi xảy ra, vui lòng{' '}
+          <Button type='link' onClick={handleRefresh}>
+            thử lại!{' '}
+          </Button>
+        </div>
+      )}
     </Row>
   );
 }
